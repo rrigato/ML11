@@ -26,6 +26,19 @@ class quoraModel:
 		print(self.train.head())
 		print(self.test.head())
 
+	def getTrainTest(self, percentTrain):
+		'''Splits the training dataset into train and test
+
+			self.xTrain = features and id for train
+			self.yTrain = one dimension array for the ground truth of train
+			self.xTest = features and id for test
+			self.yTest = one dimension array for the ground truth of test
+
+			percentTrain = argument passed by the client in the interval (0,1) that gives the
+			ratio of the total training set to subset from
+		'''
+
+
 	def getLogLoss(self, predictArray):
 		'''Gets the Log-loss for the training set on the test set
 			
