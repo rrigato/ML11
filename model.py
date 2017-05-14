@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import nltk
 from sklearn import metrics
+from sklearn.cross_validation import train_test_split
 class quoraModel:
 	def __init__(self):
 		'''
@@ -10,9 +11,10 @@ class quoraModel:
 			and question 1/ question 2 which the model is supposed to differentiate
 			whether the questions are similar or different
 			
-
+			self.RANDOM_STATE = the random_state to initialize the split for reproducible results
 		'''
 		self.loadData()
+		self.RANDOM_STATE = 1
 
 	def loadData(self):
 		'''Loads the train/test data from a csv
@@ -37,6 +39,8 @@ class quoraModel:
 			percentTrain = argument passed by the client in the interval (0,1) that gives the
 			ratio of the total training set to subset from
 		'''
+		self.xTrain, self.xTest, self.yTrain, self.yTest = train_test_split(self.train.loc[:, 'id':'question2'], self.train.loc[:,'is_duplicate'], train_size = percentTrain, random_state = self.RANDOM_STATE)
+
 
 
 	def getLogLoss(self, predictArray):
@@ -45,10 +49,12 @@ class quoraModel:
 			This function takes an arguement of the prediction for whether the questions are a duplicate or not
 		'''
 		print('Your logloss is :')
-		print(metrics.log_loss(self.train.loc[:,'is_duplicate'], predictArray))
-		return(metrics.log_loss(self.train.loc[:,'is_duplicate'], predictArray))
+		print(metrics.log_loss(self.yTest, predictArray))
+		return(metrics.log_loss(self.yTest, predictArray))
 
 if __name__ == '__main__':
 	quoraObj = quoraModel()
+
+	quoraObj.getTrainTest(.75)
 	
-	logLoss = quoraObj.getLogLoss([0]*quoraObj.train.shape[0])
+	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTrain.shape[0])
