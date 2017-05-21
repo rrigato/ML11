@@ -25,8 +25,6 @@ class quoraModel:
 		'''
 		self.train = pd.read_csv('/home/ryan/Documents/quora/train.csv')
 		self.test = pd.read_csv('/home/ryan/Documents/quora/test.csv')
-		print(self.train.head())
-		print(self.test.head())
 
 	def getTrainTest(self, percentTrain):
 		'''Splits the training dataset into train and test
@@ -39,8 +37,36 @@ class quoraModel:
 			percentTrain = argument passed by the client in the interval (0,1) that gives the
 			ratio of the total training set to subset from
 		'''
+
+		'''
+			Casting question1 and question2 as strings
+		'''
+		self.train.loc[:,['question1', 'question2']] = self.train.loc[:,['question1', 'question2']].astype(str)
+		self.test.loc[:,['question1', 'question2']] = self.test.loc[:,['question1', 'question2']].astype(str)
+
+		'''
+			splitting into train and test
+		'''
 		self.xTrain, self.xTest, self.yTrain, self.yTest = train_test_split(self.train.loc[:, 'id':'question2'], self.train.loc[:,'is_duplicate'], train_size = percentTrain, random_state = self.RANDOM_STATE)
 
+	def getWordTokens(self):
+		'''Applies the word_tokenize function to train/test 
+			The word_tokenize function from the nltk module takes a sentance and returns a dictionary corresponding
+			To each space in the sentance.
+			
+			This will transform self.xTrain/self.yTrain from having a string for each question as a variable to a dictionary
+			
+			Applies for both question1 and question2
+		'''
+		
+		self.xTrain.loc[:,'q1Token'] = self.xTrain.loc[:,'question1'].apply(nltk.word_tokenize)
+		self.xTrain.loc[:,'q2Token'] = self.xTrain.loc[:,'question2'].apply(nltk.word_tokenize)
+		
+		self.xTest.loc[:,'q1Token'] = self.xTest.loc[:,'question1'].apply(nltk.word_tokenize)
+		self.xTest.loc[:,'q2Token'] = self.xTest.loc[:,'question2'].apply(nltk.word_tokenize)
+
+		print(self.xTest.loc[:,'q1Token':'q2Token'].head())
+		print(self.xTrain.loc[:,'q1Token':'q2Token'].head())
 
 
 	def getLogLoss(self, predictArray):
@@ -57,4 +83,6 @@ if __name__ == '__main__':
 
 	quoraObj.getTrainTest(.75)
 	
-	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTrain.shape[0])
+	quoraObj.getWordTokens()
+	
+	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTest.shape[0])
