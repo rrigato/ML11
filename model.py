@@ -4,6 +4,7 @@ import numpy as np
 import nltk
 from sklearn import metrics
 from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
 class quoraModel:
 	def __init__(self):
@@ -65,6 +66,11 @@ class quoraModel:
 
 			the first of which is the wordCount which is simply the number of words in each question
 		'''
+		self.train.loc[:,'q1WordCount'] = self.train.loc[:,'q1Token'].apply(len)
+		self.train.loc[:,'q2WordCount'] = self.train.loc[:,'q2Token'].apply(len)
+
+		self.test.loc[:,'q1WordCount'] = self.test.loc[:,'q1Token'].apply(len)
+		self.test.loc[:,'q2WordCount'] = self.test.loc[:,'q2Token'].apply(len)
 
 
 	def getTrainTest(self, percentTrain):
@@ -94,8 +100,9 @@ class quoraModel:
 			
 			self.clf = an adaboostclassifier 
 		'''
-		self.clf = AdaBoostClassifier(n_estimators=100)
-		scores = cross_val_score(self.clf, self.xTrain, self.yTrain)
+		self.clf = AdaBoostClassifier(n_estimators=10)
+		self.clf.fit(self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain)
+		scores = cross_val_score(self.clf, self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain)
 		
 	def getLogLoss(self, predictArray):
 		'''Gets the Log-loss for the training set on the test set
