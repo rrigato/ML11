@@ -57,6 +57,15 @@ class quoraModel:
 		self.test.loc[:,'q1Token'] = self.test.loc[:,'question1'].apply(nltk.word_tokenize)
 		self.test.loc[:,'q2Token'] = self.test.loc[:,'question2'].apply(nltk.word_tokenize)
 
+	def getQuantitative(self):
+		'''Getting quantitative features from word_tokenize
+		
+			word_tokenize returns a list for each word split on whitespace
+			This function will add some quantitative features to go along with this information
+
+			the first of which is the wordCount which is simply the number of words in each question
+		'''
+
 
 	def getTrainTest(self, percentTrain):
 		'''Splits the training dataset into train and test
@@ -74,7 +83,7 @@ class quoraModel:
 		'''
 			splitting into train and test
 		'''
-		self.xTrain, self.xTest, self.yTrain, self.yTest = train_test_split(self.train.loc[:, 'id':'question2'], self.train.loc[:,'is_duplicate'], train_size = percentTrain, random_state = self.RANDOM_STATE)
+		self.xTrain, self.xTest, self.yTrain, self.yTest = train_test_split(self.train.drop('is_duplicate',axis = 1), self.train.loc[:,'is_duplicate'], train_size = percentTrain, random_state = self.RANDOM_STATE)
 
 
 
