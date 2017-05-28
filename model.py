@@ -7,6 +7,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
+from os.path import expanduser
 class quoraModel:
 	def __init__(self):
 		'''
@@ -130,7 +131,12 @@ class quoraModel:
 
 		self.test.loc[:,'is_duplicate'] = self.nb.predict(self.test.loc[:,['q1WordCount','q2WordCount']])
 
-		self.test.to_csv('/~/Documents/quora/results1.csv', index = False)
+		self.results = self.test.loc[:,['test_id', 'is_duplicate']]
+
+		'''
+			Cross-platform solution for findining the home directory
+		'''
+		self.results.to_csv(expanduser("~") + '/Documents/quora/results1.csv', index = False)
 
 if __name__ == '__main__':
 	quoraObj = quoraModel()
