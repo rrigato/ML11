@@ -6,6 +6,7 @@ from sklearn import metrics
 from sklearn.cross_validation import train_test_split
 from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
 class quoraModel:
 	def __init__(self):
 		'''
@@ -100,10 +101,18 @@ class quoraModel:
 			
 			self.clf = an adaboostclassifier 
 		'''
-		self.clf = AdaBoostClassifier(n_estimators=10)
+		'''
+		self.clf = AdaBoostClassifier(n_estimators=10, n_jobs = 3)
 		self.clf.fit(self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain)
-		scores = cross_val_score(self.clf, self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain)
-		
+		scores = cross_val_score(self.clf, self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain, n_jobs = 3)
+		'''
+
+		self.nb = GaussianNB()
+		self.nb.fit(self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain)
+		scores = cross_val_score(self.nb, self.xTrain.loc[:,['q1WordCount','q2WordCount']], self.yTrain, n_jobs = 3, cv = 5)
+		print('Average cross validation score across 5 provisions\n', scores.mean()) 
+
+
 	def getLogLoss(self, predictArray):
 		'''Gets the Log-loss for the training set on the test set
 			
@@ -113,12 +122,24 @@ class quoraModel:
 		print(metrics.log_loss(self.yTest, predictArray))
 		return(metrics.log_loss(self.yTest, predictArray))
 
+	def writeResults(self):
+		'''Writes the results of the model to a csv
+
+			Predicts on the full test set and writes the results to a csv
+		'''
+
+		self.test.loc[:,'is_duplicate'] = self.nb.predict(self.test.loc[:,['q1WordCount','q2WordCount']])
+
+		self.test.to_csv('/~/Documents/quora/results1.csv', index = False)
+
 if __name__ == '__main__':
 	quoraObj = quoraModel()
 
 	quoraObj.getFeatures()
 	
 	quoraObj.getWordTokens()
+
+	quoraObj.getQuantitative()
 	quoraObj.getTrainTest(.75)
 	
 	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTest.shape[0])
