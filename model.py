@@ -1,7 +1,6 @@
 #!usr/bin/python3
 import pandas as pd
 import numpy as np
-import nltk
 from sklearn import metrics
 from sklearn.cross_validation import train_test_split
 from sklearn.cross_validation import cross_val_score
@@ -14,6 +13,7 @@ from keras.utils import to_categorical
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
+import os
 
 class quoraModel:
 	def __init__(self):
@@ -24,10 +24,13 @@ class quoraModel:
 			
 			self.RANDOM_STATE = the random_state to initialize the split for reproducible results
 			self.MAX_WORDS = gets the maximum number of words for numeric tokenizing
+			self.MAX_SEQUENCE_LENGTH = maximum length of a sequence
 		'''
 		self.loadData()
 		self.RANDOM_STATE = 1
-		self.MAX_WORDS = 25000
+		self.MAX_WORDS = 140000
+		self.MAX_SEQUENCE_LENGTH = 1176
+		self.GLOVE_DIR = '/home/ryan/Documents/wordEmbedding'
 
 	def loadData(self):
 		'''Loads the train/test data from a csv
@@ -39,6 +42,39 @@ class quoraModel:
 		self.train = pd.read_csv('/home/ryan/Documents/quora/train.csv')
 		self.test = pd.read_csv('/home/ryan/Documents/quora/test.csv')
 
+
+	def loadWordEmbedding(self):
+		'''Loads the pre-trained wordEmbedding algorithm
+
+			word embedding is basically finding words that are similar to the ones you are using
+			
+			Here are two common word embedding algorithms:
+
+			From stanford:
+			GloVe= Global Vectors for Word Representation
+
+			From Google:
+			word2vec
+		'''
+		self.embeddings_index = {}
+		'''
+			Opens and iterates over every line in the file and appends
+			to the embeddings_index
+		'''
+		f = open(os.path.join(self.GLOVE_DIR, 'glove.6B.100d.txt'))
+		
+		#iterates over each line
+		for line in f:
+			#each line has a new embedding
+			values = line.split()
+			
+			#first value in the array is the name of the word
+			word = values[0]
+			
+			#coefcients for all other words that are similar to the word we are interested in
+			coefs = np.asarray(values[1:], dtype='float32')
+			self.embeddings_index[word] = coefs
+		f.close()
 
 	def getFeatures(self):
 		'''Gets some features for use in the machine learning model
@@ -180,6 +216,8 @@ class quoraModel:
 
 if __name__ == '__main__':
 	quoraObj = quoraModel()
+
+	quoraObj.loadWordEmbedding()
 
 	quoraObj.getFeatures()
 	
