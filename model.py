@@ -153,8 +153,8 @@ class quoraModel:
 		'''		
 		self.word_index = self.tokenizer.word_index
 
-		num_words = min(self.MAX_NB_WORDS, len(self.word_index))
-		self.embedding_matrix = np.zeros((num_words, self.EMBEDDING_DIM))
+		self.num_words = min(self.MAX_NB_WORDS, len(self.word_index))
+		self.embedding_matrix = np.zeros((self.num_words, self.EMBEDDING_DIM))
 
 
 		'''
@@ -207,7 +207,14 @@ class quoraModel:
 
 
 
+	def getDeepModel(self):
+		'''Gets a deep learning model
 
+			The first layer of this model will be an embedded layer
+
+		'''
+
+		self.embedding_layer = Embedding(self.num_words, self.EMBEDDING_DIM, weights = [self.embedding_matrix], input_length = self.MAX_SEQUENCE_LENGTH, trainable = False)
 	
 	def getModel(self):
 		'''Build an adaboost model using self.xTrain
@@ -259,9 +266,17 @@ if __name__ == '__main__':
 	
 	quoraObj.getWordTokens()
 
-	quoraObj.getQuantitative()
+	quoraObj.getEmbeddedMatrix()
+
+	print(quoraObj.embedding_matrix.shape)
+
+	
 	quoraObj.getTrainTest(.75)
+	'''
+	quoraObj.getQuantitative()
+	
 	
 	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTest.shape[0])
 
 	quoraObj.writeResults()
+	'''
