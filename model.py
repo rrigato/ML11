@@ -14,6 +14,7 @@ from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding
 from keras.models import Model
 import os
+import sys
 
 class quoraModel:
 	def __init__(self):
@@ -25,12 +26,15 @@ class quoraModel:
 			self.RANDOM_STATE = the random_state to initialize the split for reproducible results
 			self.MAX_WORDS = gets the maximum number of words for numeric tokenizing
 			self.MAX_SEQUENCE_LENGTH = maximum length of a sequence
+
+			self.MAX_NB_WORDS = How many words we need to embedd
 		'''
 		self.loadData()
 		self.RANDOM_STATE = 1
 		self.MAX_WORDS = 140000
 		self.MAX_SEQUENCE_LENGTH = 1176
 		self.GLOVE_DIR = '/home/ryan/Documents/wordEmbedding'
+		self.MAX_NB_WORDS = 40000
 
 	def loadData(self):
 		'''Loads the train/test data from a csv
@@ -134,8 +138,18 @@ class quoraModel:
 		
 		self.test.loc[:,'q1Token'] = self.test.loc[:,'question1'].apply(nltk.word_tokenize)
 		self.test.loc[:,'q2Token'] = self.test.loc[:,'question2'].apply(nltk.word_tokenize)
-
+ 
 	'''
+
+
+	def getEmbeddedMatrix(self):
+		'''Does the Pre-processing necessary to use the pre-trained word embedding
+		'''
+		'''
+			Gets a dictionary where the key is the name of the word and the value is the 
+			number of times the token appears in the dataset
+		'''		
+		self.word_index = self.tokenizer.word_index
 	def getQuantitative(self):
 		'''Getting quantitative features from word_tokenize
 		
