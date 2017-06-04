@@ -28,6 +28,7 @@ class quoraModel:
 			self.MAX_SEQUENCE_LENGTH = maximum length of a sequence
 
 			self.MAX_NB_WORDS = How many words we need to embedd
+			self.EMBEDDING_DIM = number of dimensions in the embedded matrix
 		'''
 		self.loadData()
 		self.RANDOM_STATE = 1
@@ -35,6 +36,7 @@ class quoraModel:
 		self.MAX_SEQUENCE_LENGTH = 1176
 		self.GLOVE_DIR = '/home/ryan/Documents/wordEmbedding'
 		self.MAX_NB_WORDS = 40000
+		self.EMBEDDING_DIM = 100
 
 	def loadData(self):
 		'''Loads the train/test data from a csv
@@ -150,6 +152,26 @@ class quoraModel:
 			number of times the token appears in the dataset
 		'''		
 		self.word_index = self.tokenizer.word_index
+
+		num_words = min(self.MAX_NB_WORDS, len(self.word_index))
+		self.embedding_matrix = np.zeros((num_words, self.EMBEDDING_DIM))
+
+
+		'''
+			Iterates over every distinct word in the question1/question2 for train/test
+
+			And adds the embedded pre-trained weights to a matrix
+		'''
+		for word, i in self.word_index.items():
+			if i >= self.MAX_NB_WORDS:
+				continue
+			embedding_vector = self.embeddings_index.get(word)
+			if embedding_vector is not None:
+				# words not found in embedding index will be all-zeros.
+				self.embedding_matrix[i] = embedding_vector
+
+
+
 	def getQuantitative(self):
 		'''Getting quantitative features from word_tokenize
 		
