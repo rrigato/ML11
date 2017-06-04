@@ -69,8 +69,25 @@ class quoraModel:
 			The goal here is to employ some word embedding algorithm to get words
 			with similiar meanings 
 		'''
-		tokenizer = Tokenizer(num_words=self.MAX_WORDS)
-		tokenizer.fit_on_texts(pd.concat([self.train.question1, self.train.question2, self.test.question1, self.test.question2]))
+		self.tokenizer = Tokenizer(num_words=self.MAX_WORDS)
+		
+		#Applies a numeric vector scale from 0 to self.MAX_WORDS
+		self.tokenizer.fit_on_texts(pd.concat([self.train.question1, self.train.question2, self.test.question1, self.test.question2]))
+
+		'''
+			Fits the tokenizer on question1/question2 of train/test
+
+			The goal here is to convert each string into a the numeric representations scaled above
+			
+			Each string will be converted into a sequence of numeric word tokens
+		'''
+		
+		self.train.loc[:,'q1Token'] = self.tokenizer.texts_to_sequences(self.train.loc[:,'question1'])
+		self.train.loc[:,'q2Token'] = self.tokenizer.texts_to_sequences(self.train.loc[:,'question2'])
+		
+		self.test.loc[:,'q1Token'] = self.tokenizer.texts_to_sequences(self.test.loc[:,'question1'])
+		self.test.loc[:,'q2Token'] = self.tokenizer.texts_to_sequences(self.test.loc[:,'question2'])
+		
 
 
 	'''
