@@ -23,9 +23,11 @@ class quoraModel:
 			whether the questions are similar or different
 			
 			self.RANDOM_STATE = the random_state to initialize the split for reproducible results
+			self.MAX_WORDS = gets the maximum number of words for numeric tokenizing
 		'''
 		self.loadData()
 		self.RANDOM_STATE = 1
+		self.MAX_WORDS = 25000
 
 	def loadData(self):
 		'''Loads the train/test data from a csv
@@ -60,7 +62,15 @@ class quoraModel:
 			Applies for both question1 and question2
 		'''
 
-		self.train.loc[:,'q1Token'] = 
+		'''
+			Fitting a tokenizer object, the tokenizer object allows for the X most 
+			common words to be given a numeric vector
+
+			The goal here is to employ some word embedding algorithm to get words
+			with similiar meanings 
+		'''
+		tokenizer = Tokenizer(num_words=self.MAX_WORDS)
+		tokenizer.fit_on_texts(pd.concat([self.train.question1, self.train.question2, self.test.question1, self.test.question2]))
 
 
 	'''
