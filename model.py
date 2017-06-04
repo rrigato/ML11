@@ -8,6 +8,13 @@ from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from os.path import expanduser
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.utils import to_categorical
+from keras.layers import Dense, Input, Flatten
+from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.models import Model
+
 class quoraModel:
 	def __init__(self):
 		'''
@@ -43,7 +50,6 @@ class quoraModel:
 		self.test.loc[:,['question1', 'question2']] = self.test.loc[:,['question1', 'question2']].astype(str)
 
 
-
 	def getWordTokens(self):
 		'''Applies the word_tokenize function to train/test 
 			The word_tokenize function from the nltk module takes a sentance and returns a dictionary corresponding
@@ -53,6 +59,12 @@ class quoraModel:
 			
 			Applies for both question1 and question2
 		'''
+
+		self.train.loc[:,'q1Token'] = 
+
+
+	'''
+
 		
 		self.train.loc[:,'q1Token'] = self.train.loc[:,'question1'].apply(nltk.word_tokenize)
 		self.train.loc[:,'q2Token'] = self.train.loc[:,'question2'].apply(nltk.word_tokenize)
@@ -60,6 +72,7 @@ class quoraModel:
 		self.test.loc[:,'q1Token'] = self.test.loc[:,'question1'].apply(nltk.word_tokenize)
 		self.test.loc[:,'q2Token'] = self.test.loc[:,'question2'].apply(nltk.word_tokenize)
 
+	'''
 	def getQuantitative(self):
 		'''Getting quantitative features from word_tokenize
 		
@@ -129,14 +142,14 @@ class quoraModel:
 			Predicts on the full test set and writes the results to a csv
 		'''
 
-		self.test.loc[:,'is_duplicate'] = self.nb.predict(self.test.loc[:,['q1WordCount','q2WordCount']])
+		self.test.loc[:,'is_duplicate'] = self.nb.predict_proba(self.test.loc[:,['q1WordCount','q2WordCount']])
 
 		self.results = self.test.loc[:,['test_id', 'is_duplicate']]
 
 		'''
 			Cross-platform solution for findining the home directory
 		'''
-		self.results.to_csv(expanduser("~") + '/Documents/quora/results1.csv', index = False)
+		self.results.to_csv(expanduser("~") + '/Documents/quora/results2.csv', index = False)
 
 if __name__ == '__main__':
 	quoraObj = quoraModel()
@@ -149,3 +162,5 @@ if __name__ == '__main__':
 	quoraObj.getTrainTest(.75)
 	
 	logLoss = quoraObj.getLogLoss([0]*quoraObj.yTest.shape[0])
+
+	quoraObj.writeResults()
