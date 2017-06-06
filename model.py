@@ -11,7 +11,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.layers import Dense, Input, Flatten
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+from keras.layers import Conv1D, MaxPooling1D, Embedding, LSTM
 from keras.models import Model
 import os
 import sys
@@ -35,7 +35,7 @@ class quoraModel:
 		self.MAX_WORDS = 140000
 		self.MAX_SEQUENCE_LENGTH = 238
 		self.GLOVE_DIR = '/home/ryan/Documents/wordEmbedding'
-		self.MAX_NB_WORDS = 40000
+		self.MAX_NB_WORDS = 140000
 		self.EMBEDDING_DIM = 100
 
 	def loadData(self):
@@ -215,6 +215,30 @@ class quoraModel:
 		'''
 
 		self.embedding_layer = Embedding(self.num_words, self.EMBEDDING_DIM, weights = [self.embedding_matrix], input_length = self.MAX_SEQUENCE_LENGTH, trainable = False)
+
+		paddedX = pad_sequences(self.xTrain.q1Token, 238)
+		
+		paddedTest = pad_sequences(self.xTest.q1Token, 238)
+
+
+		sequence_input = Input(shape=(self.MAX_SEQUENCE_LENGTH,), dtype='int32')
+		embedded_sequence = self.embedding_layer(sequence_input)
+
+
+
+		#x = Conv1D(128, 5, activation='relu')(embedded_sequences)
+
+		lstm_layer = LSTM(13)
+		x = lstm_layer(embedded_sequence)
+		merge =Dense(112, activation='sigmoid')(x)
+		preds = Dense(1, activation='softmax')(merge)
+
+		model = Model(sequence_input, preds)
+
+
+		model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+		model.fit(paddedX, self.yTrain, batch_size=1000, epochs=2, validation_data=(paddedTest, self.yTest))
 	
 	def getModel(self):
 		'''Build an adaboost model using self.xTrain
@@ -270,8 +294,10 @@ if __name__ == '__main__':
 
 	print(quoraObj.embedding_matrix.shape)
 
-	
+
 	quoraObj.getTrainTest(.75)
+	quoraObj.getDeepModel()
+	
 	'''
 	quoraObj.getQuantitative()
 	
