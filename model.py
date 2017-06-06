@@ -13,6 +13,7 @@ from keras.utils import to_categorical
 from keras.layers import Dense, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, LSTM
 from keras.models import Model
+from keras.layers.merge import concatenate
 import os
 import sys
 
@@ -217,28 +218,37 @@ class quoraModel:
 		self.embedding_layer = Embedding(self.num_words, self.EMBEDDING_DIM, weights = [self.embedding_matrix], input_length = self.MAX_SEQUENCE_LENGTH, trainable = False)
 
 		paddedX = pad_sequences(self.xTrain.q1Token, 238)
+	
+		paddedX2 = pad_sequences(self.xTrain.q2Token, 238)
 		
 		paddedTest = pad_sequences(self.xTest.q1Token, 238)
 
-
+		paddedTest2 = pad_sequences(self.xTest.q2Token, 238)
 		sequence_input = Input(shape=(self.MAX_SEQUENCE_LENGTH,), dtype='int32')
 		embedded_sequence = self.embedding_layer(sequence_input)
 
+
+		sequence_2_input = Input(shape=(self.MAX_SEQUENCE_LENGTH,), dtype='int32')
+		embedded_sequences_2 = self.embedding_layer(sequence_2_input)
+		
 
 
 		#x = Conv1D(128, 5, activation='relu')(embedded_sequences)
 
 		lstm_layer = LSTM(13)
 		x = lstm_layer(embedded_sequence)
-		merge =Dense(112, activation='sigmoid')(x)
-		preds = Dense(1, activation='softmax')(merge)
 
-		model = Model(sequence_input, preds)
+		question2 = lstm_layer(embedded_sequences_2)
+		merged = concatenate([x,question2])
+		merged =Dense(112, activation='sigmoid')(merged)
+		preds = Dense(1, activation='softmax')(merged)
+
+		model = Model([sequence_input, sequence_2_input], preds)
 
 
 		model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
 
-		model.fit(paddedX, self.yTrain, batch_size=1000, epochs=2, validation_data=(paddedTest, self.yTest))
+		model.fit([paddedX, paddedX2], self.yTrain, batch_size=1000, epochs=2, validation_data=([paddedTest, paddedTest2], self.yTest))
 	
 	def getModel(self):
 		'''Build an adaboost model using self.xTrain
