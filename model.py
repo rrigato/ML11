@@ -33,7 +33,7 @@ class quoraModel:
 		self.loadData()
 		self.RANDOM_STATE = 1
 		self.MAX_WORDS = 140000
-		self.MAX_SEQUENCE_LENGTH = 1176
+		self.MAX_SEQUENCE_LENGTH = 238
 		self.GLOVE_DIR = '/home/ryan/Documents/wordEmbedding'
 		self.MAX_NB_WORDS = 40000
 		self.EMBEDDING_DIM = 100
@@ -153,7 +153,7 @@ class quoraModel:
 		'''		
 		self.word_index = self.tokenizer.word_index
 
-		self.num_words = min(self.MAX_NB_WORDS, len(self.word_index))
+		self.num_words = min(self.MAX_NB_WORDS, len(self.word_index)) + 1
 		self.embedding_matrix = np.zeros((self.num_words, self.EMBEDDING_DIM))
 
 
